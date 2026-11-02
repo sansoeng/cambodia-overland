@@ -1,8 +1,8 @@
-name: Deploy to GitHub Pages
+name: Deploy to Production (cambodiaoverlandtravel.com)
 
 on:
   push:
-    branches: [main]
+    branches: [production]
   workflow_dispatch:
 
 permissions:
