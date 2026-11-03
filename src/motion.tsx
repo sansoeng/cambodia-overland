@@ -75,7 +75,7 @@ export function Reveal({ children, className = '', delay = 0 }: { children: Reac
   return <div ref={ref} className={`rise ${shown ? 'is-in' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>{children}</div>
 }
 
-export type Feature = { img: string; alt: string; title: string; eyebrow?: string; text?: string }
+export type Feature = { img: string; alt: string; title: string; eyebrow?: string; text?: string; link?: { href: string; label: string } }
 
 /**
  * The Bend Club "sticky features": pinned at center, clip-path inset reveal of each image,
@@ -166,6 +166,12 @@ export function StickyFeatures({ features, id }: { features: Feature[]; id?: str
                     {f.eyebrow && <p className="sf__eyebrow" data-sf-text>{f.eyebrow}</p>}
                     <h3 data-sf-text>{f.title}</h3>
                     {f.text && <p className="sf__desc" data-sf-text>{f.text}</p>}
+                    {f.link && (
+                      <a className="btn-split sf__btn" href={f.link.href} data-sf-text>
+                        <span className="btn-split__label">{f.link.label}</span>
+                        <span className="btn-split__icon"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></span>
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>

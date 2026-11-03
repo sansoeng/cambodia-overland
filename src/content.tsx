@@ -4,16 +4,27 @@ import { images } from './siteImages'
 
 /* ------------------------------------------------------------------ Tour packages */
 
-export type Tour = { id: string; image: string; type: string; title: ReactNode; price: string; dates: string; days: number }
+/** Tour style, used by the Tour Packages filter. */
+export type TourStyle = 'group' | 'dirt-bike' | 'day'
+export type Tour = { id: string; image: string; type: string; title: ReactNode; price: string; dates: string; days: number; style: TourStyle }
 
 export const tours: Tour[] = [
-  { id: 'discovery', image: images.tours.discovery, type: 'Adventure', title: <>Cambodia Discovery:<br />Temples to Rainforests</>, price: '$1,350', dates: 'Nov 29 – Dec 8, 2026', days: 10 },
-  { id: 'photography', image: images.tours.photography, type: 'Photography', title: <>Siem Reap – Photography<br />& Cultural Tour</>, price: '$980', dates: 'Apr 18–24, 2027', days: 7 },
-  { id: 'secret-siem-reap', image: images.tours.secretSiemReap, type: 'Active', title: <>Secret Siem Reap: 3-Day Hidden<br />Trails & Remote Ruins</>, price: '$620', dates: 'Jun 6–8, 2027', days: 3 },
-  { id: 'tonle-sap', image: images.tours.tonleSap, type: 'Community', title: <>Tonlé Sap: Floating<br />Villages & Homestays</>, price: '$540', dates: 'Jul 11–13, 2027', days: 3 },
-  { id: 'phnom-penh', image: images.tours.phnomPenh, type: 'City & Culture', title: <>Phnom Penh & the<br />Mekong Riverside</>, price: '$760', dates: 'Aug 22–26, 2027', days: 5 },
-  { id: 'cardamom', image: images.tours.cardamom, type: 'Trekking', title: <>Cardamom Mountains:<br />Rainforest Trek</>, price: '$1,120', dates: 'Oct 3–9, 2027', days: 7 },
+  { id: 'discovery', image: images.tours.discovery, type: 'Adventure', title: <>Cambodia Discovery:<br />Temples to Rainforests</>, price: '$1,350', dates: 'Nov 29 – Dec 8, 2026', days: 10, style: 'group' },
+  { id: 'photography', image: images.tours.photography, type: 'Photography', title: <>Siem Reap – Photography<br />& Cultural Tour</>, price: '$980', dates: 'Apr 18–24, 2027', days: 7, style: 'group' },
+  { id: 'secret-siem-reap', image: images.tours.secretSiemReap, type: 'Active', title: <>Secret Siem Reap: 3-Day Hidden<br />Trails & Remote Ruins</>, price: '$620', dates: 'Jun 6–8, 2027', days: 3, style: 'group' },
+  { id: 'tonle-sap', image: images.tours.tonleSap, type: 'Community', title: <>Tonlé Sap: Floating<br />Villages & Homestays</>, price: '$540', dates: 'Jul 11–13, 2027', days: 3, style: 'group' },
+  { id: 'phnom-penh', image: images.tours.phnomPenh, type: 'City & Culture', title: <>Phnom Penh & the<br />Mekong Riverside</>, price: '$760', dates: 'Aug 22–26, 2027', days: 5, style: 'group' },
+  { id: 'cardamom', image: images.tours.cardamom, type: 'Trekking', title: <>Cardamom Mountains:<br />Rainforest Trek</>, price: '$1,120', dates: 'Oct 3–9, 2027', days: 7, style: 'group' },
 ]
+
+/* More packages listed on #/tours only (placeholders: swap in your real dirt bike and day tours). */
+export const moreTours: Tour[] = [
+  { id: 'northern-trails', image: images.tours.northernTrails, type: 'Dirt Bike', title: <>Northern Trails:<br />Dirt Bike Adventure</>, price: '$890', dates: 'Jan 10–14, 2027', days: 5, style: 'dirt-bike' },
+  { id: 'cardamom-enduro', image: images.tours.cardamomEnduro, type: 'Dirt Bike', title: <>Cardamom Enduro:<br />Jungle Dirt Bike Tour</>, price: '$760', dates: 'Feb 14–17, 2027', days: 4, style: 'dirt-bike' },
+  { id: 'angkor-sunrise', image: images.tours.angkorSunrise, type: 'Day Tour', title: <>Angkor Sunrise &<br />Temple Day Tour</>, price: '$95', dates: 'Daily departures', days: 1, style: 'day' },
+  { id: 'banteay-srei', image: images.tours.banteaySrei, type: 'Day Tour', title: <>Banteay Srei &<br />Countryside Day Tour</>, price: '$75', dates: 'Daily departures', days: 1, style: 'day' },
+]
+export const allTours: Tour[] = [...tours, ...moreTours]
 
 /* Tengile MalaMala hover: a pill label follows the cursor over the image and slides up from a mask. */
 export function TourCard({ tour, showLength = false, datePrefix = 'from ' }: { tour: Tour; showLength?: boolean; datePrefix?: string }) {
@@ -35,7 +46,7 @@ export function TourCard({ tour, showLength = false, datePrefix = 'from ' }: { t
         </div>
       </div>
       <div className="pillar__meta">
-        <p>{tour.type}{showLength && ` · ${tour.days} days`}</p>
+        <p>{tour.type}{showLength && ` · ${tour.days} ${tour.days === 1 ? 'day' : 'days'}`}</p>
         <h3>{tour.title}</h3>
         <p className="pillar__date">{datePrefix}{tour.dates}</p>
         <span className="sr-only">From {tour.price} per person</span>

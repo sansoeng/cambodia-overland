@@ -5,7 +5,7 @@ import { PageHero, WordTitle } from './Hero'
 import { images } from './siteImages'
 import { Footer } from './sections'
 import { Reveal, ScrollRevealText, usePinRefresh, useSquircles } from './motion'
-import { StoryCard, TourCard, stories, tours } from './content'
+import { StoryCard, TourCard, allTours, stories, type TourStyle } from './content'
 
 function useListingPage() {
   const root = useRef<HTMLDivElement>(null)
@@ -14,6 +14,13 @@ function useListingPage() {
   return root
 }
 
+const styles: { label: string; style: TourStyle | null }[] = [
+  { label: 'All tours', style: null },
+  { label: 'Group tours', style: 'group' },
+  { label: 'Dirt bike tours', style: 'dirt-bike' },
+  { label: 'Day tours', style: 'day' },
+]
+
 const lengths = [
   { label: 'All', test: () => true },
   { label: 'Up to 5 days', test: (d: number) => d <= 5 },
@@ -21,13 +28,14 @@ const lengths = [
   { label: '10+ days', test: (d: number) => d >= 10 },
 ]
 
-/** #/tours — every tour package in a grid, filterable by trip length. */
+/** #/tours — every tour package in a grid, filterable by tour type and trip length (both apply together). */
 export function ToursPage() {
   const root = useListingPage()
+  const [style, setStyle] = useState(0)
   const [filter, setFilter] = useState(0)
-  const shown = tours.filter((t) => lengths[filter].test(t.days))
+  const shown = allTours.filter((t) => (styles[style].style === null || t.style === styles[style].style) && lengths[filter].test(t.days))
   // The footer reveal is scroll-driven, so re-measure once the grid height changes.
-  useEffect(() => { ScrollTrigger.refresh() }, [filter])
+  useEffect(() => { ScrollTrigger.refresh() }, [style, filter])
 
   return (
     <div className="listing" ref={root} data-bg-root>
@@ -40,10 +48,17 @@ export function ToursPage() {
           </div>
         </section>
         <div className="listing__bar">
-          <div className="listing__filters" role="group" aria-label="Filter by trip length">
-            {lengths.map((l, i) => (
-              <button key={l.label} type="button" className="listing__filter" aria-pressed={filter === i} onClick={() => setFilter(i)}>{l.label}</button>
-            ))}
+          <div className="listing__filter-groups">
+            <div className="listing__filters" role="group" aria-label="Filter by tour type">
+              {styles.map((st, i) => (
+                <button key={st.label} type="button" className="listing__filter" aria-pressed={style === i} onClick={() => setStyle(i)}>{st.label}</button>
+              ))}
+            </div>
+            <div className="listing__filters" role="group" aria-label="Filter by trip length">
+              {lengths.map((l, i) => (
+                <button key={l.label} type="button" className="listing__filter" aria-pressed={filter === i} onClick={() => setFilter(i)}>{i === 0 ? 'Any length' : l.label}</button>
+              ))}
+            </div>
           </div>
           <p className="listing__count" aria-live="polite">{shown.length} {shown.length === 1 ? 'package' : 'packages'}</p>
         </div>
@@ -52,6 +67,9 @@ export function ToursPage() {
             <Reveal key={tour.id} delay={(i % 3) * 80}><TourCard tour={tour} showLength /></Reveal>
           ))}
         </div>
+        {shown.length === 0 && (
+          <p className="listing__empty">No packages match these filters yet. <button type="button" onClick={() => { setStyle(0); setFilter(0) }}>Show all tours</button></p>
+        )}
       </main>
       <Footer />
     </div>

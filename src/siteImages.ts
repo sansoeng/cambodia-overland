@@ -38,6 +38,11 @@ export const images = {
     tonleSap: a('cam-stilt-village.jpg'), // Tonlé Sap: Floating Villages
     phnomPenh: a('cam-phnom-penh.jpg'), // Phnom Penh & the Mekong Riverside
     cardamom: a('cam-cardamom.jpg'),    // Cardamom Mountains: Rainforest Trek
+    /* Tour Packages page only (placeholders) */
+    northernTrails: a('cam-rice-field.jpg'),   // Northern Trails: Dirt Bike Adventure
+    cardamomEnduro: a('cam-river-homes.jpg'),  // Cardamom Enduro: Jungle Dirt Bike Tour
+    angkorSunrise: a('a40d9.jpg'),             // Angkor Sunrise & Temple Day Tour
+    banteaySrei: a('cam-banteay-srei.jpg'),    // Banteay Srei & Countryside Day Tour
   },
 
   /* Home — Community image cloud (6 photos) */

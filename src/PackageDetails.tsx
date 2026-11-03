@@ -426,13 +426,9 @@ function PhotoTour({ open, start, onClose }: { open: boolean; start: number | nu
       duration: 0.55,
       ease: 'power3.inOut',
       onComplete: () => {
+        // The viewer hides instantly (the photo now sits exactly on the page image); the reset happens once it has
+        // really closed (see the open effect's cleanup), never on a timer that could fire while it is still open.
         onClose()
-        // The viewer hides instantly (the photo now sits exactly on the page image), then resets.
-        window.setTimeout(() => {
-          root.classList.remove('is-closing')
-          gsap.set(img, { clearProps: 'all' })
-          closing.current = false
-        }, 60)
       },
     })
   }, [view, index, onClose])
@@ -451,6 +447,15 @@ function PhotoTour({ open, start, onClose }: { open: boolean; start: number | nu
       hideSource() // show the page image again in the same frame the viewer disappears
       lockScroll(false)
       prev?.focus({ preventScroll: true })
+      if (closing.current) {
+        // Keep .is-closing (no fade) until the hidden state has been painted, then reset the photo for next time.
+        const root = rootRef.current, img = imgRef.current
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          root?.classList.remove('is-closing')
+          if (img) gsap.set(img, { clearProps: 'all' })
+          closing.current = false
+        }))
+      }
     }
   }, [open, start, n])
 

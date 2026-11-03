@@ -6,6 +6,7 @@ import AboutPage from './AboutPage'
 import EthicalTourismPage from './EthicalTourismPage'
 import ContactPage from './ContactPage'
 import BlogPostPage from './BlogPostPage'
+import RegionPage from './RegionPage'
 import { PrivacyPage, TermsPage } from './LegalPage'
 import { BlogPage, ToursPage } from './ListingPages'
 import { TourCard, tours } from './content'
@@ -19,9 +20,9 @@ import { logoParts as LP } from './logoParts'
 
 
 const days: Feature[] = [
-  { img: images.homePanels[0], alt: 'Angkor Wat temple towers', eyebrow: 'Explore 3 regions', title: 'Culture & History', text: 'Begin where time stands still among ancient stones, flooded forests, and floating villages on Tonle Sap. Every carving tells a millennium-old story of living heritage and hidden temples.' },
-  { img: images.homePanels[1], alt: 'Travellers kayaking on a Cambodian lake', eyebrow: 'Explore 3 regions', title: 'Eco-East', text: 'The Mekong greets you with endless life: fishermen, bird-filled trails. Beyond the river, highland forests showcase authentic community conservation.' },
-  { img: images.homePanels[2], alt: 'Jungle temple ruins at dusk', eyebrow: 'Explore 3 regions', title: 'Southern Coast & Mountains', text: 'Where emerald peaks meet the sea, unwind along sleepy riverside towns, fragrant pepper plantations, and Kep’s crab markets. Deeper in the Cardamom ridges, secluded jungle waterways await.' },
+  { img: images.homePanels[0], alt: 'Angkor Wat temple towers', eyebrow: 'Explore 3 regions', title: 'Culture & History', text: 'Begin where time stands still among ancient stones, flooded forests, and floating villages on Tonle Sap. Every carving tells a millennium-old story of living heritage and hidden temples.', link: { href: '#/regions/culture-history', label: 'Explore more' } },
+  { img: images.homePanels[1], alt: 'Travellers kayaking on a Cambodian lake', eyebrow: 'Explore 3 regions', title: 'Eco-East', text: 'The Mekong greets you with endless life: fishermen, bird-filled trails. Beyond the river, highland forests showcase authentic community conservation.', link: { href: '#/regions/eco-east', label: 'Explore more' } },
+  { img: images.homePanels[2], alt: 'Jungle temple ruins at dusk', eyebrow: 'Explore 3 regions', title: 'Southern Coast & Mountains', text: 'Where emerald peaks meet the sea, unwind along sleepy riverside towns, fragrant pepper plantations, and Kep’s crab markets. Deeper in the Cardamom ridges, secluded jungle waterways await.', link: { href: '#/regions/southern-coast', label: 'Explore more' } },
 ]
 
 /* Tour packages in a Here & Away-style carousel: arrows in the header step one card at a time. */
@@ -277,11 +278,13 @@ export default function App() {
     return () => window.removeEventListener('hashchange', on)
   }, [])
   useTitleReveal(route)
-  // Story articles live at #/stories/<slug>.
-  const Page = route.startsWith('#/stories/') ? null : pages[route] ?? Home
+  // Story articles live at #/stories/<slug>, region pages at #/regions/<slug>.
+  const Page = route.startsWith('#/stories/') || route.startsWith('#/regions/') ? null : pages[route] ?? Home
   return (
     <>
-      {Page ? <Page key={route} /> : <BlogPostPage key={route} slug={decodeURIComponent(route.slice('#/stories/'.length))} />}
+      {Page ? <Page key={route} />
+        : route.startsWith('#/regions/') ? <RegionPage key={route} slug={decodeURIComponent(route.slice('#/regions/'.length))} />
+        : <BlogPostPage key={route} slug={decodeURIComponent(route.slice('#/stories/'.length))} />}
       <div className="ptx" ref={overlay} aria-hidden="true">
         {/* Logo built from separate pieces (src/logoParts.ts) so the transition can animate it. Static masks:
             the letters rise inside their own line, the sun and mountain rise from behind the horizon. */}
