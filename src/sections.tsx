@@ -137,6 +137,7 @@ export function Purpose() {
         <Reveal>
           <h2>Our purpose extends beyond the temples – it&rsquo;s about people. We work hand-in-hand with village families, local guides and community-based tourism partners across Cambodia to create lasting social and economic impact.</h2>
         </Reveal>
+        <Reveal className="purpose__btn" delay={120}><PillButton href="#/ethical-tourism">Travel with integrity</PillButton></Reveal>
       </div>
       <div className="purpose__marquee">
         <div className="purpose__track">

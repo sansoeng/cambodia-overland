@@ -139,7 +139,7 @@ function Home() {
       <section className="about" id="about">
         <p className="eyebrow">About us</p>
         <div>
-          <ScrollRevealText text="We are a Cambodia Overland is a proudly local tour operator creating authentic adventures and dirt bike journeys. From remote wilderness to ancient history and vibrant local communities, we take you beyond the ordinary to discover the lost spirit of Cambodia." />
+          <ScrollRevealText text="Proudly locally owned, Cambodia Overland Travel offers carefully crafted adventures off the beaten path, shaped around you." />
           <PillButton href="#/about" className="about__btn">About Us</PillButton>
         </div>
       </section>

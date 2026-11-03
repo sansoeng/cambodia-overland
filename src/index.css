@@ -759,7 +759,9 @@ html.lenis { scroll-behavior: auto; }
 
 /* Our purpose — Tengile's "Community" marquee: statement, then an endlessly looping photo row. */
 .purpose { padding: 48px 0 calc(8 * var(--r)); background: var(--color-background); overflow: hidden; }
-.purpose__container { padding: calc(2 * var(--r)) var(--pad); }
+.purpose__container { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px 40px; padding: calc(2 * var(--r)) var(--pad); }
+.purpose__btn { flex: none; }
+@media (max-width: 760px) { .purpose__container { flex-direction: column; align-items: flex-start; } }
 .purpose h2 { max-width: 760px; margin: 0; font: var(--fs-statement)/1.2 var(--font-medium); font-weight: 500; letter-spacing: -.01em; }
 .purpose__marquee { padding-top: calc(4 * var(--r)); overflow: hidden; }
 .purpose__track { display: flex; align-items: flex-start; width: max-content; animation: purpose-marquee 50s linear infinite; }
