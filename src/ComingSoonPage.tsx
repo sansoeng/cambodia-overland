@@ -34,8 +34,8 @@ const socialLinks = [
 ]
 
 export default function ComingSoonPage() {
-  const word1 = ['C', 'o', 'm', 'i', 'n', 'g']
-  const word2 = ['s', 'o', 'o', 'n']
+  const word1 = ['U', 'n', 'd', 'e', 'r']
+  const word2 = ['M', 'a', 'i', 'n', 't', 'e', 'n', 'a', 'n', 'c', 'e']
 
   return (
     <div className="coming-soon">
@@ -60,9 +60,9 @@ export default function ComingSoonPage() {
         </a>
       </header>
 
-      {/* Center Hero: Big Revealing "Coming soon" Title & Socials / Contact */}
+      {/* Center Hero: Big Revealing "Under Maintenance" Title & Socials / Contact */}
       <main className="coming-soon__center">
-        <h1 className="coming-soon__reveal-title" aria-label="Coming soon">
+        <h1 className="coming-soon__reveal-title" aria-label="Under Maintenance">
           <span className="coming-soon__word">
             {word1.map((ch, i) => (
               <span

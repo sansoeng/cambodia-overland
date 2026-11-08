@@ -247,10 +247,10 @@ function StagingBadge() {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderLeft: '1px solid rgba(255,255,255,0.15)', paddingLeft: 8 }}>
         <a
-          href="#/coming-soon"
+          href="#/maintenance"
           style={{ color: '#E85118', textDecoration: 'underline', fontSize: 11, fontWeight: 500 }}
         >
-          Coming Soon
+          Maintenance
         </a>
         <button
           onClick={() => setCollapsed(true)}
@@ -393,6 +393,7 @@ export default function App() {
     '#/': isStaging ? Home : ComingSoonPage,
     '#/home': Home,
     '#/coming-soon': ComingSoonPage,
+    '#/maintenance': ComingSoonPage,
     '#/package': PackageDetails,
     '#/tours': ToursPage,
     '#/stories': BlogPage,
