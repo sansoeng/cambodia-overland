@@ -162,22 +162,115 @@ function Home() {
   )
 }
 
-const pages: Record<string, ComponentType> = {
-  '#/': ComingSoonPage,
-  '#/home': Home,
-  '#/coming-soon': ComingSoonPage,
-  '#/package': PackageDetails,
-  '#/tours': ToursPage,
-  '#/stories': BlogPage,
-  '#/about': AboutPage,
-  '#/ethical-tourism': EthicalTourismPage,
-  '#/contact': ContactPage,
-  '#/privacy': PrivacyPage,
-  '#/terms': TermsPage,
+function isStagingEnvironment(): boolean {
+  if (typeof window === 'undefined') return false
+  const host = window.location.hostname
+  const search = window.location.search
+  const hash = window.location.hash
+  if (host.startsWith('staging.') || host.includes('staging') || host.includes('localhost') || host.includes('127.0.0.1')) {
+    return true
+  }
+  if (search.includes('staging') || search.includes('preview')) {
+    try { sessionStorage.setItem('cambodia_staging_mode', 'true') } catch {}
+    return true
+  }
+  if (hash.startsWith('#/staging') || hash.startsWith('#/preview')) {
+    try { sessionStorage.setItem('cambodia_staging_mode', 'true') } catch {}
+    return true
+  }
+  try {
+    if (sessionStorage.getItem('cambodia_staging_mode') === 'true') {
+      return true
+    }
+  } catch {}
+  return false
+}
+
+function StagingBadge() {
+  const [collapsed, setCollapsed] = useState(false)
+  if (collapsed) {
+    return (
+      <button
+        onClick={() => setCollapsed(false)}
+        title="Open Staging Info"
+        style={{
+          position: 'fixed',
+          bottom: 18,
+          right: 18,
+          zIndex: 9999,
+          background: '#09201A',
+          color: '#E85118',
+          border: '1px solid rgba(232, 81, 24, 0.4)',
+          borderRadius: 20,
+          padding: '6px 14px',
+          fontSize: 12,
+          fontWeight: 600,
+          cursor: 'pointer',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+          fontFamily: 'inherit',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+        }}
+      >
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
+        Staging
+      </button>
+    )
+  }
+  return (
+    <aside
+      aria-label="Staging environment notice"
+      style={{
+        position: 'fixed',
+        bottom: 18,
+        right: 18,
+        zIndex: 9999,
+        background: 'rgba(9, 32, 26, 0.95)',
+        backdropFilter: 'blur(10px)',
+        color: '#FFFFFF',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: 14,
+        padding: '8px 14px',
+        fontSize: 12,
+        boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+        fontFamily: 'inherit',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
+        <span style={{ fontWeight: 600 }}>Staging Review</span>
+        <span style={{ opacity: 0.6, display: 'inline-block' }}>Client Mode</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderLeft: '1px solid rgba(255,255,255,0.15)', paddingLeft: 8 }}>
+        <a
+          href="#/coming-soon"
+          style={{ color: '#E85118', textDecoration: 'underline', fontSize: 11, fontWeight: 500 }}
+        >
+          Coming Soon
+        </a>
+        <button
+          onClick={() => setCollapsed(true)}
+          style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: 14, padding: '0 2px' }}
+          aria-label="Collapse"
+        >
+          ✕
+        </button>
+      </div>
+    </aside>
+  )
 }
 
 // Old #/blog links (and #/blog/<slug>) still work: they open the Stories pages.
-const normRoute = (hash: string, current: string) => (hash === '' || hash === '#/' ? '#/' : hash.startsWith('#/blog') ? hash.replace('#/blog', '#/stories') : hash.startsWith('#/') ? hash : current)
+const normRoute = (hash: string, current: string) => {
+  if (hash === '#/staging' || hash === '#/preview') return '#/'
+  if (hash === '' || hash === '#/') return '#/'
+  if (hash.startsWith('#/blog')) return hash.replace('#/blog', '#/stories')
+  return hash.startsWith('#/') ? hash : current
+}
 
 /** Resolves once the new page's banner photo (or first image) is decoded, or after `max` ms. */
 function heroReady(max = 1200) {
@@ -213,6 +306,7 @@ function holdScroll(on: boolean) {
  * nothing heavy to draw behind it and the logo build stays smooth.
  */
 export default function App() {
+  const [isStaging, setIsStaging] = useState(isStagingEnvironment)
   const [route, setRoute] = useState(() => normRoute(window.location.hash, '#/'))
   const routeRef = useRef(route)
   const overlay = useRef<HTMLDivElement>(null)
@@ -245,6 +339,10 @@ export default function App() {
       })
     }
     const on = () => {
+      if (window.location.hash.startsWith('#/staging') || window.location.hash.startsWith('#/preview')) {
+        try { sessionStorage.setItem('cambodia_staging_mode', 'true') } catch {}
+        setIsStaging(true)
+      }
       const next = normRoute(window.location.hash, routeRef.current)
       if (next === routeRef.current || busy.current) return
       const el = overlay.current, mark = logo.current
@@ -291,6 +389,19 @@ export default function App() {
     return () => window.removeEventListener('hashchange', on)
   }, [])
   useTitleReveal(route)
+  const pages: Record<string, ComponentType> = {
+    '#/': isStaging ? Home : ComingSoonPage,
+    '#/home': Home,
+    '#/coming-soon': ComingSoonPage,
+    '#/package': PackageDetails,
+    '#/tours': ToursPage,
+    '#/stories': BlogPage,
+    '#/about': AboutPage,
+    '#/ethical-tourism': EthicalTourismPage,
+    '#/contact': ContactPage,
+    '#/privacy': PrivacyPage,
+    '#/terms': TermsPage,
+  }
   // Story articles live at #/stories/<slug>, region pages at #/regions/<slug>.
   const Page = route.startsWith('#/stories/') || route.startsWith('#/regions/') ? null : pages[route] ?? Home
   return (
@@ -298,6 +409,7 @@ export default function App() {
       {Page ? <Page key={route} />
         : route.startsWith('#/regions/') ? <RegionPage key={route} slug={decodeURIComponent(route.slice('#/regions/'.length))} />
         : <BlogPostPage key={route} slug={decodeURIComponent(route.slice('#/stories/'.length))} />}
+      {isStaging && <StagingBadge />}
       <div className="ptx" ref={overlay} aria-hidden="true">
         {/* Logo built from separate pieces (src/logoParts.ts) so the transition can animate it. Static masks:
             the letters rise inside their own line, the sun and mountain rise from behind the horizon. */}

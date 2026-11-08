@@ -7,10 +7,11 @@ import { images } from './siteImages'
 
 /* Placeholder contact details: replace with the real ones before publishing. */
 export const contact = {
-  email: 'sansoeng16@gmail.com',
-  phone: '+855 92 594 717',
-  phoneHref: 'tel:+85592594717',
-  whatsapp: 'https://wa.me/85592594717',
+  email: 'hi@cambodiaoverlandtravel.com',
+  phone: '+855 81 254 836',
+  phoneHref: 'tel:+85581254836',
+  whatsapp: 'https://wa.me/447398898675',
+  whatsappDisplay: '+44 7398 898675',
   address: ['No. 24, Sivatha Boulevard', 'Svay Dangkum, Siem Reap', 'Cambodia'],
   hours: 'Mon – Sat, 8:00 – 18:00 (GMT+7)',
 }
@@ -159,9 +160,12 @@ export default function ContactPage() {
                 <a href={`mailto:${contact.email}`}>{contact.email}</a>
               </div>
               <div className="ct__item">
-                <p className="eyebrow">Phone &amp; WhatsApp</p>
+                <p className="eyebrow">Phone</p>
                 <a href={contact.phoneHref}>{contact.phone}</a>
-                <a className="ct__small" href={contact.whatsapp} target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a>
+              </div>
+              <div className="ct__item">
+                <p className="eyebrow">WhatsApp</p>
+                <a href={contact.whatsapp} target="_blank" rel="noopener noreferrer">{contact.whatsappDisplay}</a>
               </div>
               <div className="ct__item">
                 <p className="eyebrow">Visit our office</p>
