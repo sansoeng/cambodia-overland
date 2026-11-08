@@ -9,6 +9,7 @@ import BlogPostPage from './BlogPostPage'
 import RegionPage from './RegionPage'
 import { PrivacyPage, TermsPage } from './LegalPage'
 import { BlogPage, ToursPage } from './ListingPages'
+import ComingSoonPage from './ComingSoonPage'
 import { TourCard, tours } from './content'
 import SiteNav from './SiteNav'
 import { HeroLine, useHeroScroll } from './Hero'
@@ -161,7 +162,19 @@ function Home() {
   )
 }
 
-const pages: Record<string, ComponentType> = { '#/package': PackageDetails, '#/tours': ToursPage, '#/stories': BlogPage, '#/about': AboutPage, '#/ethical-tourism': EthicalTourismPage, '#/contact': ContactPage, '#/privacy': PrivacyPage, '#/terms': TermsPage }
+const pages: Record<string, ComponentType> = {
+  '#/': ComingSoonPage,
+  '#/home': Home,
+  '#/coming-soon': ComingSoonPage,
+  '#/package': PackageDetails,
+  '#/tours': ToursPage,
+  '#/stories': BlogPage,
+  '#/about': AboutPage,
+  '#/ethical-tourism': EthicalTourismPage,
+  '#/contact': ContactPage,
+  '#/privacy': PrivacyPage,
+  '#/terms': TermsPage,
+}
 
 // Old #/blog links (and #/blog/<slug>) still work: they open the Stories pages.
 const normRoute = (hash: string, current: string) => (hash === '' || hash === '#/' ? '#/' : hash.startsWith('#/blog') ? hash.replace('#/blog', '#/stories') : hash.startsWith('#/') ? hash : current)

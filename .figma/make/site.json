@@ -1,1 +1,11 @@
-{}
+{
+  "title": "Cambodia Overland — Expeditions & Adventure Tours",
+  "description": "Uncharted trails, ancient wonders, and ethical overland expeditions through the heart of Cambodia.",
+  "language": "en",
+  "openGraph": {
+    "image": "https://cambodiaoverlandtravel.com/assets/coming-soon-bg.jpg"
+  },
+  "robots": {
+    "index": true
+  }
+}

@@ -6,7 +6,7 @@ import { images } from './siteImages'
 
 
 export const primaryNav: NavItem[] = [
-  { label: 'Home', route: '#/' },
+  { label: 'Home', route: '#/home' },
   { label: 'Tour Packages', route: '#/tours' },
   { label: 'Community', section: 'community' },
   { label: 'Stories', route: '#/stories' },
@@ -17,12 +17,12 @@ export const secondaryNav: NavItem[] = [
   { label: 'Our Story', section: 'overview' },
   { label: 'Plan Your Trip', section: 'plan' },
   { label: 'Contact', route: '#/contact' },
+  { label: 'Coming Soon Mode', route: '#/coming-soon' },
 ]
 
 export const socials = [
-  { label: 'Instagram', href: 'https://www.instagram.com/' },
-  { label: 'Facebook', href: 'https://www.facebook.com/' },
-  { label: 'YouTube', href: 'https://www.youtube.com/' },
+  { label: 'Instagram', href: 'https://www.instagram.com/cambodiaoverland.travel/' },
+  { label: 'Facebook', href: 'https://www.facebook.com/cambodiaoverland.travels/' },
 ]
 
 /* Full-screen menu: the main pages (minus Community) plus About Us and Contact, all as large links (the footer keeps its own lists). */
@@ -164,7 +164,7 @@ export default function SiteNav({ tone = 'light' }: { tone?: 'light' | 'dark' })
     wasOpen.current = open
   }, [open])
 
-  const home = (e: MouseEvent) => { e.preventDefault(); goTo({ label: 'Home', route: '#/' }) }
+  const home = (e: MouseEvent) => { e.preventDefault(); goTo({ label: 'Home', route: '#/home' }) }
   const cls = ['header', `is-${tone}`, scrolled && 'is-scrolled', hidden && 'is-hidden', animated && 'has-transitions'].filter(Boolean).join(' ')
 
   return (

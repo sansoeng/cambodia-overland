@@ -11,6 +11,7 @@ export const images = {
   /* Header */
   logo: a('brand/logo.svg'),            // Wordmark, dark green (light backgrounds)
   logoLight: a('brand/logo-light.svg'),  // Wordmark, cream (photos and dark backgrounds)
+  comingSoonBg: a('coming-soon-bg.jpg'), // Great Hornbill flying across jungle canopy
 
   /* Home — top of page */
   hero: a('149a7.webp'),          // Poster shown while the banner video loads

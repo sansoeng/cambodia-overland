@@ -7,10 +7,10 @@ import { images } from './siteImages'
 
 /* Placeholder contact details: replace with the real ones before publishing. */
 export const contact = {
-  email: 'hello@cambodiaoverland.com',
-  phone: '+855 12 345 678',
-  phoneHref: 'tel:+85512345678',
-  whatsapp: 'https://wa.me/85512345678',
+  email: 'sansoeng16@gmail.com',
+  phone: '+855 92 594 717',
+  phoneHref: 'tel:+85592594717',
+  whatsapp: 'https://wa.me/85592594717',
   address: ['No. 24, Sivatha Boulevard', 'Svay Dangkum, Siem Reap', 'Cambodia'],
   hours: 'Mon – Sat, 8:00 – 18:00 (GMT+7)',
 }
