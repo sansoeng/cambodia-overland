@@ -356,11 +356,11 @@ html.lenis { scroll-behavior: auto; }
 @media (prefers-reduced-motion: reduce) { .pd-tour, .pd-tour.is-open { transition: visibility 0s; } .pd-tour__scroll { animation: none; } }
 .pd__body { display: grid; grid-template-columns: minmax(0, 720px) minmax(320px, 470px); justify-content: space-between; gap: 48px; padding: calc(64 * var(--u)) var(--pad) calc(100 * var(--u)); align-items: start; }
 .pd__label { margin: 0 0 16px; font-size: var(--fs-subtext); }
-.pd__lead { margin: 0; max-width: 860px; font-family: var(--font-medium); font-size: var(--fs-lead); line-height: 1.45; }
+.pd__lead { margin: 0; width: 800px; max-width: 100%; font-family: var(--font-medium); font-size: var(--fs-lead); line-height: 1.45; }
 @media (min-width: 1440px) {
   .pd__body { grid-template-columns: 860px 470px; justify-content: space-between; }
   .pd__main { width: 860px; }
-  .pd__lead { max-width: 860px; }
+  .pd__lead { width: 800px; max-width: 100%; }
 }
 .pd__main hr { border: 0; border-top: 1px solid var(--color-line); margin: 44px 0; }
 .pd__h3 { margin: 0; font-family: var(--font-medium); font-weight: 500; font-size: var(--fs-card-title); }
