@@ -302,7 +302,7 @@ html.lenis { scroll-behavior: auto; }
 /* Banner: Airbnb "My portfolio" collage. Large photo (about 2/3) beside two stacked photos.
    Only the outer corners are fully rounded; inner corners stay tight, as on Airbnb. */
 .pd__gwrap { position: relative; margin-top: calc(50 * var(--u)); padding: 0 var(--pad); }
-.pd__gallery { position: relative; display: grid; grid-template-columns: 1.94fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; height: clamp(380px, 520 / 1440 * 100vw, 600px); }
+.pd__gallery { position: relative; display: grid; grid-template-columns: 1.94fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; height: clamp(400px, 740 / 1440 * 100vw, 740px); }
 .pd__gbtn { display: block; min-width: 0; min-height: 0; padding: 0; border: 0; background: var(--color-background-alt); cursor: pointer; border-radius: 10px; overflow: hidden; }
 .pd__gbtn.is-1 { grid-row: span 2; border-radius: 38px 10px 10px 38px; }
 .pd__gbtn.is-2 { border-radius: 10px 38px 10px 10px; }
@@ -314,15 +314,10 @@ html.lenis { scroll-behavior: auto; }
 .pd__allphotos:active { transform: scale(.94); }
 .pd__allphotos:focus-visible { outline: 2px solid var(--color-background); outline-offset: 2px; }
 
-/* Portfolio viewer: white full-screen slideshow + masonry grid (fades in; photos fly in from the page). */
-.pd-tour { position: fixed; inset: 0; z-index: 110; display: flex; flex-direction: column; background: var(--color-background); color: var(--color-primary); opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s; }
-.pd-tour.is-open { opacity: 1; visibility: visible; transition: opacity .3s ease; }
-/* Closing: the white backdrop and controls fade while the photo flies back to its place on the page;
-   once it lands, the viewer disappears at once (no second fade over the identical page image). */
-.pd-tour.is-open.is-closing { background-color: transparent; transition: background-color .5s ease; }
-.pd-tour.is-closing .pd-tour__bar, .pd-tour.is-closing .pd-tour__nav { opacity: 0; transition: opacity .25s ease; }
-.pd-tour.is-closing:not(.is-open) { transition: none; }
-.pd-tour__bar { position: relative; display: flex; align-items: center; justify-content: center; flex: none; height: 80px; padding: 0 24px; }
+/* Portfolio viewer: full-screen modal slideshow & masonry grid with buttery smooth backdrop */
+.pd-tour { position: fixed; inset: 0; z-index: 110; display: flex; flex-direction: column; background: var(--color-background); color: var(--color-primary); opacity: 0; visibility: hidden; pointer-events: none; }
+.pd-tour.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+.pd-tour__bar { position: relative; display: flex; align-items: center; justify-content: center; flex: none; height: 80px; padding: 0 24px; user-select: none; }
 .pd-tour__bar p { margin: 0; font: var(--fs-subtext)/1 var(--font-medium); color: var(--color-grey); font-variant-numeric: tabular-nums; }
 .pd-tour__bar .is-left { position: absolute; left: 20px; top: 50%; translate: 0 -50%; }
 .pd-tour__bar .is-right { position: absolute; right: 20px; top: 50%; translate: 0 -50%; }
@@ -331,8 +326,8 @@ html.lenis { scroll-behavior: auto; }
 .pd-tour__icon:active:not(:disabled) { transform: scale(.92); }
 .pd-tour__icon:disabled { opacity: .25; cursor: default; }
 .pd-tour__icon:focus-visible, .pd-tour__tile:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
-.pd-tour__stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 16px 120px 96px; }
-.pd-tour__photo { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; clip-path: inset(0px 0px 0px 0px round 32px); transform-origin: 50% 50%; will-change: transform; user-select: none; }
+.pd-tour__stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 16px 120px 96px; cursor: zoom-out; }
+.pd-tour__photo { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; border-radius: 24px; box-shadow: 0 18px 50px -10px rgba(0, 0, 0, 0.22); transform-origin: 50% 50%; user-select: none; cursor: default; will-change: transform, opacity; }
 .pd-tour__nav { position: absolute; top: calc(50% - 40px); z-index: 1; }
 .pd-tour__nav.is-prev { left: 20px; }
 .pd-tour__nav.is-next { right: 20px; }

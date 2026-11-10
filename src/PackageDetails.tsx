@@ -358,28 +358,9 @@ const StackIcon = () => (
   </svg>
 )
 
-/* The on-page image a photo was opened from, so the viewer can fly the photo out of it. */
-function findSource(src: string, root: HTMLElement | null) {
-  for (const img of document.querySelectorAll<HTMLImageElement>('img')) {
-    if (img.getAttribute('src') !== src || root?.contains(img)) continue
-    const r = img.getBoundingClientRect()
-    if (r.width > 0 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth) {
-      // Corner size: the image's own radius, else its squircle frame's (itinerary photos), else 16px.
-      const own = parseFloat(getComputedStyle(img).borderTopLeftRadius)
-      const frame = Number(img.closest<HTMLElement>('[data-squircle]')?.dataset.squircle)
-      return { rect: r, radius: own || frame || 16, el: img }
-    }
-  }
-  return null
-}
-
-type Fly = { index: number; rect: DOMRect; radius: number; el?: HTMLImageElement }
-const photoRadius = () => (innerWidth <= 760 ? 18 : 32)
-
 /*
- * Airbnb portfolio viewer. A white full-screen slideshow ("3 of 12", arrows, grid button) and a
- * masonry grid of every photo. Opening a photo flies it out of the image that was clicked; closing flies it
- * back into that image on the page (the white backdrop fades away meanwhile).
+ * Full-screen tour photo gallery slideshow + masonry grid.
+ * Smooth fade & soft scale transition without layout glitches.
  */
 function PhotoTour({ open, start, onClose }: { open: boolean; start: number | null; onClose: () => void }) {
   const [view, setView] = useState<'slide' | 'grid'>('slide')
@@ -388,107 +369,64 @@ function PhotoTour({ open, start, onClose }: { open: boolean; start: number | nu
   const imgRef = useRef<HTMLImageElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const fly = useRef<Fly | null>(null)
   const touch = useRef(0)
   const closing = useRef(false)
-  // The page image a photo flies out of / back into is hidden meanwhile, so there are never two copies on screen.
-  const hiddenSrc = useRef<HTMLElement | null>(null)
-  const hideSource = (el?: HTMLElement) => {
-    if (hiddenSrc.current && hiddenSrc.current !== el) hiddenSrc.current.style.visibility = ''
-    hiddenSrc.current = el ?? null
-    if (el) el.style.visibility = 'hidden'
-  }
   const n = tourPhotos.length
   const go = useCallback((d: number) => setIndex((i) => Math.min(n - 1, Math.max(0, i + d))), [n])
 
-  // Close by zooming the photo back into the same image on the page; falls back to a plain fade when that
-  // image isn't on screen (or in grid view / with reduced motion).
   const requestClose = useCallback(() => {
     if (closing.current) return
+    closing.current = true
     const root = rootRef.current
     const img = imgRef.current
-    const target = view === 'slide' && img ? findSource(tourPhotos[index].src, root) : null
-    if (!root || !img || !target || matchMedia('(prefers-reduced-motion: reduce)').matches) { onClose(); return }
-    closing.current = true
-    const from = img.getBoundingClientRect()
-    const s = Math.max(target.rect.width / from.width, target.rect.height / from.height)
-    const ix = (from.width * s - target.rect.width) / 2 / s
-    const iy = (from.height * s - target.rect.height) / 2 / s
-    gsap.killTweensOf(img)
-    hideSource(target.el)
-    root.classList.add('is-closing')
-    // Explicit start values in the same format as the end ones, so the clip (crop + corners) interpolates smoothly.
-    gsap.fromTo(img, { x: 0, y: 0, scale: 1, clipPath: `inset(0px 0px 0px 0px round ${photoRadius()}px)` }, {
-      x: target.rect.left + target.rect.width / 2 - (from.left + from.width / 2),
-      y: target.rect.top + target.rect.height / 2 - (from.top + from.height / 2),
-      scale: s,
-      clipPath: `inset(${iy}px ${ix}px ${iy}px ${ix}px round ${target.radius / s}px)`,
-      duration: 0.55,
-      ease: 'power3.inOut',
+    if (!root || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      closing.current = false
+      onClose()
+      return
+    }
+    const tl = gsap.timeline({
       onComplete: () => {
-        // The viewer hides instantly (the photo now sits exactly on the page image); the reset happens once it has
-        // really closed (see the open effect's cleanup), never on a timer that could fire while it is still open.
+        closing.current = false
         onClose()
       },
     })
-  }, [view, index, onClose])
+    tl.to(root, { opacity: 0, duration: 0.22, ease: 'power2.inOut' }, 0)
+    if (img) {
+      tl.to(img, { scale: 0.96, opacity: 0, duration: 0.2, ease: 'power2.in' }, 0)
+    }
+  }, [onClose])
 
   useLayoutEffect(() => {
     if (!open) return
     const s = Math.min(n - 1, Math.max(0, start ?? 0))
-    const src = findSource(tourPhotos[s].src, rootRef.current)
-    fly.current = src ? { index: s, ...src } : null
     setIndex(s)
     setView('slide')
+    closing.current = false
     const prev = document.activeElement as HTMLElement | null
     lockScroll(true)
     closeRef.current?.focus({ preventScroll: true })
+    if (rootRef.current) {
+      gsap.fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power2.out' })
+    }
     return () => {
-      hideSource() // show the page image again in the same frame the viewer disappears
       lockScroll(false)
       prev?.focus({ preventScroll: true })
-      if (closing.current) {
-        // Keep .is-closing (no fade) until the hidden state has been painted, then reset the photo for next time.
-        const root = rootRef.current, img = imgRef.current
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          root?.classList.remove('is-closing')
-          if (img) gsap.set(img, { clearProps: 'all' })
-          closing.current = false
-        }))
-      }
     }
   }, [open, start, n])
 
-  // Each new slide either flies in from the image it was opened from, or settles in with a soft scale.
+  // Slide entrance animation: smooth fade and subtle scale
   useLayoutEffect(() => {
     const img = imgRef.current
     if (!open || view !== 'slide' || !img) return
-    const f = fly.current && fly.current.index === index ? fly.current : null
-    if (f) fly.current = null
-    if (f?.el) hideSource(f.el)
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
-    const r = photoRadius()
-    let tween: gsap.core.Tween | undefined
-    let live = true
-    gsap.set(img, { autoAlpha: 0 })
-    const run = () => {
-      if (!live) return
-      gsap.set(img, { autoAlpha: 1 })
-      if (reduce) return
-      if (f) {
-        const to = img.getBoundingClientRect()
-        const s = Math.max(f.rect.width / to.width, f.rect.height / to.height)
-        const ix = (to.width * s - f.rect.width) / 2 / s
-        const iy = (to.height * s - f.rect.height) / 2 / s
-        tween = gsap.fromTo(img,
-          { x: f.rect.left + f.rect.width / 2 - (to.left + to.width / 2), y: f.rect.top + f.rect.height / 2 - (to.top + to.height / 2), scale: s, clipPath: `inset(${iy}px ${ix}px ${iy}px ${ix}px round ${f.radius / s}px)` },
-          { x: 0, y: 0, scale: 1, clipPath: `inset(0px 0px 0px 0px round ${r}px)`, duration: 0.6, ease: 'power3.inOut', clearProps: 'transform' })
-      } else {
-        tween = gsap.fromTo(img, { autoAlpha: 0, scale: 0.96 }, { autoAlpha: 1, scale: 1, duration: 0.38, ease: 'power2.out', clearProps: 'transform' })
-      }
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.set(img, { opacity: 1, scale: 1 })
+      return
     }
-    if (img.complete && img.naturalWidth) run(); else img.decode().then(run, run)
-    return () => { live = false; tween?.kill() }
+    gsap.fromTo(
+      img,
+      { opacity: 0, scale: 0.96 },
+      { opacity: 1, scale: 1, duration: 0.28, ease: 'power2.out', clearProps: 'transform' }
+    )
   }, [open, view, index])
 
   // Back in the grid, bring the photo you were looking at into view.
@@ -508,9 +446,7 @@ function PhotoTour({ open, start, onClose }: { open: boolean; start: number | nu
     return () => window.removeEventListener('keydown', onKey)
   }, [open, view, go, requestClose])
 
-  const openTile = (i: number, el: HTMLElement) => {
-    const img = el.querySelector('img')
-    if (img) fly.current = { index: i, rect: img.getBoundingClientRect(), radius: 16 }
+  const openTile = (i: number) => {
     setIndex(i)
     setView('slide')
   }
@@ -529,6 +465,9 @@ function PhotoTour({ open, start, onClose }: { open: boolean; start: number | nu
       {view === 'slide' ? (
         <div
           className="pd-tour__stage"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) requestClose()
+          }}
           onTouchStart={(e) => { touch.current = e.touches[0].clientX }}
           onTouchEnd={(e) => { const dx = e.changedTouches[0].clientX - touch.current; if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1) }}
         >
@@ -540,7 +479,7 @@ function PhotoTour({ open, start, onClose }: { open: boolean; start: number | nu
         <div className="pd-tour__scroll" ref={scrollRef} data-lenis-prevent>
           <div className="pd-tour__grid">
             {tourPhotos.map((p, i) => (
-              <button key={p.src} type="button" className="pd-tour__tile" style={{ '--i': i } as CSSProperties} onClick={(e) => openTile(i, e.currentTarget)} aria-label={`Photo ${i + 1} of ${n}, opens gallery`}>
+              <button key={p.src} type="button" className="pd-tour__tile" style={{ '--i': i } as CSSProperties} onClick={() => openTile(i)} aria-label={`Photo ${i + 1} of ${n}, opens gallery`}>
                 <img src={p.src} alt={p.alt} loading="lazy" />
               </button>
             ))}
