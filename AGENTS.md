@@ -214,7 +214,7 @@ Full details, secrets and the cutover checklist: [`docs/CLOUDFLARE.md`](docs/CLO
 | --- | --- | --- |
 | Host | Cloudflare Worker (static assets) `cambodia-overland` | Cloudflare Worker `cambodia-overland-staging` |
 | Branch | `main` / `production` | `staging` |
-| URL | `cambodiaoverlandtravel.com` (+ `www`, cutover pending) | `staging.cambodiaoverlandtravel.com` |
+| URL | `cambodiaoverlandtravel.com` (+ `www`) | `staging.cambodiaoverlandtravel.com` |
 | Config | `wrangler.jsonc` | `wrangler.staging.jsonc` |
 | Build | `pnpm build` | `pnpm build:staging` (adds noindex) |
 | Indexing | allowed | **blocked** |
@@ -229,8 +229,9 @@ Full details, secrets and the cutover checklist: [`docs/CLOUDFLARE.md`](docs/CLO
 - **Manual deploy:** `pnpm deploy:staging` / `pnpm deploy`.
 - **Do not push to `main` casually** — it deploys production. Use the `staging` branch for anything
   unverified; staging is live at `staging.cambodiaoverlandtravel.com`.
-- **Legacy:** the apex still points at GitHub Pages (4 proxied A records + `www` CNAME). Cutover
-  steps and rollback are in `docs/CLOUDFLARE.md` §4. `public/CNAME` is only for that legacy host.
+- **Legacy:** production used to be served by GitHub Pages. The apex and `www` were cut over to this
+  Worker on 2026-11-14, Pages was disabled, and the leftover `public/CNAME` was removed.
+  Cutover/rollback details: `docs/CLOUDFLARE.md` §4.
 - **Rollback:** `npx wrangler rollback`, or Dashboard → Worker → deployments.
 - **Local `pnpm build` writes `dist/`**; it is ignored by git. Don't commit it.
 

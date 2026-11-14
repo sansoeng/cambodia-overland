@@ -201,6 +201,7 @@ repo; `.env` is git-ignored (`.env.example` is tracked).
 
 | Date | Decision | Why |
 | --- | --- | --- |
+| 2026-11-14 | **Cut production over from GitHub Pages to the Cloudflare Worker** (apex + `www`), then disabled Pages | Two hosts would drift; the site is still behind the coming-soon gate so exposure was minimal; rollback documented in `CLOUDFLARE.md` |
 | 2026-11-14 | **Cloudflare (Workers static assets) with two environments** (prod `main`, staging `staging`) replaces GitHub Pages | Domain DNS already on Cloudflare; BCE uses the same model; staging needs a real isolated deploy with noindex; Cloudflare retired standalone Pages so new projects are Workers |
 | 2026-11-14 | Overland Cloudflare is managed with the shared sansoeng16 Global API key; `CLOUDFLARE_ACCOUNT_ID` selects the Overland account | The account was granted full access; one credential, explicit account pinning, no second secret to rotate |
 | 2026-11-14 | Staging noindex enforced at three layers (`robots.txt`, `_headers`, meta) | A single mechanism is too easy to bypass or forget |

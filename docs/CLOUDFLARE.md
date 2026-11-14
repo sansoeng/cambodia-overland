@@ -12,7 +12,7 @@ Read with [`ARCHITECTURE.md`](ARCHITECTURE.md).
 | Cloudflare account | `e4cdc4b38fac7bca7ed64cf4b72f0b15` — *Cotcambodiaoverland@gmail.com's Account* | same |
 | Worker (static assets) | `cambodia-overland` | `cambodia-overland-staging` |
 | Default URL | https://cambodia-overland.cambodia-overland.workers.dev | https://staging.cambodiaoverlandtravel.com |
-| Custom domain | `cambodiaoverlandtravel.com`, `www` — **attached at cutover, not yet** | `staging.cambodiaoverlandtravel.com` — attached |
+| Custom domain | `cambodiaoverlandtravel.com`, `www` — attached | `staging.cambodiaoverlandtravel.com` — attached |
 | Git branch | `main` / `production` | `staging` |
 | Config | `wrangler.jsonc` | `wrangler.staging.jsonc` |
 | Build | `pnpm build` | `pnpm build:staging` |
@@ -101,34 +101,24 @@ The old script is backed up outside the repo; nothing else used it.
 
 ---
 
-## 4. Production cutover (one-time, NOT done yet)
+## 4. Production cutover (done 2026-11-14)
 
-The apex and `www` still point at GitHub Pages (4 proxied A records to `185.199.10x.153` and a
-`www` CNAME to `sansoeng.github.io`). Cut over only after the production Worker is verified on its
-`workers.dev` URL.
+The apex and `www` previously pointed at GitHub Pages. On 2026-11-14 they were moved to the
+production Worker:
 
-1. Confirm https://cambodia-overland.cambodia-overland.workers.dev serves the site with
-   `index, follow`.
-2. Add the production routes to `wrangler.jsonc`:
+1. Production routes were added to `wrangler.jsonc` (`cambodiaoverlandtravel.com` and
+   `www.cambodiaoverlandtravel.com`, both `custom_domain: true`).
+2. The four proxied apex `A` records (`185.199.10x.153`) and the `www` CNAME
+   (`sansoeng.github.io`) were deleted — Workers custom domains refuse to attach over them.
+3. `wrangler deploy` created the Worker custom domains and the `100::` proxy records.
+4. Verified: apex returns 200 with `index, follow`, the coming-soon gate still renders, no
+   `x-github-request-id` headers, staging unaffected.
+5. GitHub Pages was disabled (`DELETE /repos/{owner}/{repo}/pages` → 204; the API now returns 404).
 
-   ```jsonc
-   "routes": [
-     { "pattern": "cambodiaoverlandtravel.com", "custom_domain": true },
-     { "pattern": "www.cambodiaoverlandtravel.com", "custom_domain": true }
-   ]
-   ```
-
-3. Delete the conflicting records **first** (Workers custom domains refuse to attach over them):
-   the four apex `A` records and the `www` `CNAME`.
-4. `pnpm deploy` — this creates the DNS records and certificates.
-5. Verify: apex serves the site, `#/` still shows the coming-soon page, staging still serves the
-   full homepage, `x-github-request-id` is gone.
-6. Disable GitHub Pages in repo settings (Settings → Pages → Source: None).
-
-**Rollback:** delete the two custom-domain routes, restore apex A records
-`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` (proxied) and the
-`www` CNAME to `sansoeng.github.io` (proxied). GitHub Pages is still serving today, so this is
-reversible until Pages is disabled.
+**Rollback:** remove the two custom-domain routes, restore apex `A` records `185.199.108.153`,
+`185.199.109.153`, `185.199.110.153`, `185.199.111.153` (proxied) and the `www` CNAME to
+`sansoeng.github.io` (proxied), then re-enable Pages in the repo settings. GitHub Pages must be
+re-enabled first (the last deployed artifact is gone once disabled).
 
 **Rollback of a bad Worker deploy:** `npx wrangler rollback` (or Dashboard → Workers →
 deployments → choose a version). Assets versions are retained.
@@ -155,5 +145,5 @@ deployments → choose a version). Assets versions are retained.
 - [x] Production Worker deployed on its `workers.dev` URL with `index, follow`
 - [x] `staging` branch pushed → CI green (run 43582755424, 2026-11-14)
 - [x] Repo secrets added (`CLOUDFLARE_API_KEY`, `CLOUDFLARE_EMAIL`, `CLOUDFLARE_ACCOUNT_ID`)
-- [ ] Apex + `www` cut over from GitHub Pages
-- [ ] GitHub Pages disabled after cutover
+- [x] Apex + `www` cut over from GitHub Pages (2026-11-14)
+- [x] GitHub Pages disabled after cutover
