@@ -11,7 +11,8 @@ Read with [`ARCHITECTURE.md`](ARCHITECTURE.md).
 | --- | --- | --- |
 | Cloudflare account | `e4cdc4b38fac7bca7ed64cf4b72f0b15` — *Cotcambodiaoverland@gmail.com's Account* | same |
 | Worker (static assets) | `cambodia-overland` | `cambodia-overland-staging` |
-| Default URL | https://cambodia-overland.cambodia-overland.workers.dev | https://staging.cambodiaoverlandtravel.com |
+| URL | https://cambodiaoverlandtravel.com (+ `www`) | https://staging.cambodiaoverlandtravel.com |
+| `workers.dev` URL | disabled once custom domains are attached | disabled |
 | Custom domain | `cambodiaoverlandtravel.com`, `www` — attached | `staging.cambodiaoverlandtravel.com` — attached |
 | Git branch | `main` / `production` | `staging` |
 | Config | `wrangler.jsonc` | `wrangler.staging.jsonc` |
