@@ -153,7 +153,7 @@ deployments → choose a version). Assets versions are retained.
 - [x] `staging.cambodiaoverlandtravel.com` attached, serving the staging build
 - [x] Staging returns `X-Robots-Tag: noindex` and `robots.txt` says `Disallow: /`
 - [x] Production Worker deployed on its `workers.dev` URL with `index, follow`
-- [ ] `staging` branch pushed → CI green
-- [ ] Repo secrets added
+- [x] `staging` branch pushed → CI green (run 43582755424, 2026-11-14)
+- [x] Repo secrets added (`CLOUDFLARE_API_KEY`, `CLOUDFLARE_EMAIL`, `CLOUDFLARE_ACCOUNT_ID`)
 - [ ] Apex + `www` cut over from GitHub Pages
 - [ ] GitHub Pages disabled after cutover
