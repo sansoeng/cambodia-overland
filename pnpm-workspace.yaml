@@ -1,0 +1,5 @@
+# pnpm settings live here (pnpm 10+ ignores the old package.json "pnpm" field).
+# esbuild and workerd need their postinstall scripts to download platform binaries.
+allowBuilds:
+  esbuild: true
+  workerd: true

@@ -1,25 +1,40 @@
-name: Deploy to Production (cambodiaoverlandtravel.com)
+name: Deploy to Cloudflare
+
+# Branch → Worker mapping:
+#   main / production → cambodia-overland          (production, custom domain attached at cutover)
+#   staging           → cambodia-overland-staging  → staging.cambodiaoverlandtravel.com
+#
+# Both sites are static-asset Workers (the current Cloudflare Pages model).
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_KEY     Global API key of the account that can manage both accounts
+#   CLOUDFLARE_EMAIL       Email that owns the key
+#   CLOUDFLARE_ACCOUNT_ID  Overland account ID (e4cdc4b38fac7bca7ed64cf4b72f0b15)
+#   VITE_WEB3FORMS_ACCESS_KEY  optional — enables the booking form POST
 
 on:
   push:
-    branches: [production, main]
+    branches:
+      - main
+      - production
+      - staging
   workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: 'pages'
-  cancel-in-progress: true
+  deployments: write
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    name: Build & deploy
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+      CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,28 +42,36 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 12
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Type check
+        run: pnpm run typecheck
+
       - name: Build
-        run: pnpm run build
+        env:
+          VITE_WEB3FORMS_ACCESS_KEY: ${{ secrets.VITE_WEB3FORMS_ACCESS_KEY }}
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "staging" ]; then
+            pnpm run build:staging
+          else
+            pnpm run build
+          fi
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "staging" ]; then
+            echo "Deploying staging…"
+            npx wrangler deploy --config wrangler.staging.jsonc
+          else
+            echo "Deploying production…"
+            npx wrangler deploy
+          fi

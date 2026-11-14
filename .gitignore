@@ -3,6 +3,8 @@ dist/
 build/
 .cache/
 .env*
+!.env.example
+.dev.vars
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo
@@ -21,3 +23,7 @@ logs/
 /.opencode-skills/
 *.mov
 *.mp4
+
+# wrangler / Cloudflare local state
+.wrangler/
+
