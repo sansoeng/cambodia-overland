@@ -7,7 +7,7 @@ import { Reveal, StickyFeatures, usePinRefresh, useSquircles, type Feature } fro
 import SiteNav from './SiteNav'
 import { CarouselArrows, Footer, PillButton } from './sections'
 import { images } from './siteImages'
-import { lockScroll } from './smooth'
+import { lockScroll, scrollToTarget } from './smooth'
 import Reviews from './Reviews'
 import RouteMap from './RouteMap'
 import Faq from './Faq'
@@ -659,6 +659,157 @@ const goodToKnow = [
   { title: 'Accessibility', text: 'Some days include boats and uneven trails. Message us for details.', icon: 'M12 3.5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5ZM5 9l7 1 7-1M12 10v4.5M12 14.5l-3 6M12 14.5l3 6' },
 ]
 
+/* Sections the floating nav can jump to, in page order. Each id lives on a wrapper in the page below. */
+const navSections = [
+  { id: 'pd-overview', label: 'Overview' },
+  { id: 'pd-included', label: 'What’s included' },
+  { id: 'pd-stays', label: 'Stays' },
+  { id: 'pd-know', label: 'Good to know' },
+  { id: 'pd-guide', label: 'Guide' },
+  { id: 'pd-route', label: 'Route' },
+  { id: 'pd-highlights', label: 'Highlights' },
+  { id: 'pd-itinerary', label: 'Itinerary' },
+  { id: 'pd-reviews', label: 'Reviews' },
+  { id: 'pd-faq', label: 'FAQ' },
+]
+
+/**
+ * Floating section nav, modelled on Red Dot's pageNavCarousel: a frosted pill pinned to the bottom of
+ * the screen. It stays hidden over the trip header, unveils itself once the photos have passed (the
+ * frame clips open from the right while the links fade in inside it), marks the section crossing the
+ * lower edge of the screen, and slides away over the footer. Timings and easings are the original's:
+ * power3.inOut for the frame, power2.inOut for the links (0.6s in, 0.4s out).
+ */
+function SectionNav() {
+  const navRef = useRef<HTMLElement>(null)
+  const pillRef = useRef<HTMLDivElement>(null)
+  const itemsRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
+  const [active, setActive] = useState(0)
+  const [shown, setShown] = useState(false)
+  const activeIndex = useRef(0)
+  const visibleRef = useRef(false)
+
+  /* Phones: keep the active chip in view when the row is wider than the screen. */
+  const centre = useCallback((index: number) => {
+    const list = listRef.current
+    const item = list?.children[index] as HTMLElement | undefined
+    if (!list || !item || list.scrollWidth <= list.clientWidth + 1) return
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    list.scrollTo({ left: item.offsetLeft - (list.clientWidth - item.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'auto' })
+  }, [])
+
+  useLayoutEffect(() => {
+    const nav = navRef.current
+    const pill = pillRef.current
+    const items = itemsRef.current
+    const page = nav?.closest<HTMLElement>('.pd')
+    if (!nav || !pill || !items || !page) return
+    const hero = page.querySelector<HTMLElement>('.pd__hero')
+    const footer = page.querySelector<HTMLElement>('.footer')
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const closed = 'inset(0px 100% 0% 0px round 100px)'
+    const open = 'inset(0px 0% 0% 0px round 100px)'
+    const tweens: gsap.core.Timeline[] = []
+    gsap.set(pill, { clipPath: closed, xPercent: 50 })
+    gsap.set(items, { autoAlpha: 0 })
+
+    const show = () => {
+      setShown(true)
+      centre(activeIndex.current)
+      if (reduce) {
+        gsap.set(pill, { clipPath: open, xPercent: 0 })
+        gsap.set(items, { autoAlpha: 1 })
+        return
+      }
+      const tl = gsap.timeline()
+      tl.to(pill, { clipPath: open, xPercent: 0, duration: 0.6, ease: 'power3.inOut', overwrite: 'auto' })
+      tl.to(items, { autoAlpha: 1, duration: 0.6, ease: 'power2.inOut', overwrite: 'auto' })
+      tweens.push(tl)
+    }
+
+    const hide = () => {
+      if (reduce) {
+        gsap.set(items, { autoAlpha: 0 })
+        gsap.set(pill, { clipPath: closed, xPercent: 50 })
+        setShown(false)
+        return
+      }
+      const tl = gsap.timeline({ onComplete: () => setShown(false) })
+      tl.to(items, { autoAlpha: 0, duration: 0.4, ease: 'power2.inOut', overwrite: 'auto' })
+      tl.to(pill, { clipPath: closed, xPercent: 50, duration: 0.4, ease: 'power3.inOut', overwrite: 'auto' })
+      tweens.push(tl)
+    }
+
+    const targets = navSections.map((s) => page.querySelector<HTMLElement>(`#${s.id}`))
+
+    const ctx = gsap.context(() => {
+      // One driver for the whole page: it reads live geometry, so pinned sections, their spacers and
+      // late-loading images can never leave the pill or the section marks measured against stale boxes.
+      const sync = () => {
+        const vh = window.innerHeight
+        const heroRect = hero?.getBoundingClientRect()
+        const footerRect = footer?.getBoundingClientRect()
+        const wanted = (!heroRect || heroRect.bottom < vh * 0.75) && !(footerRect && footerRect.top < vh)
+        if (wanted !== visibleRef.current) {
+          visibleRef.current = wanted
+          if (wanted) show()
+          else hide()
+        }
+        // A section is active once its box has crossed the reference line near the top of the screen,
+        // so a short section still lights up after jumping to it.
+        const line = vh * 0.18
+        let next = -1
+        targets.forEach((el, i) => {
+          if (!el) return
+          const r = el.getBoundingClientRect()
+          if (r.top <= line && r.bottom >= line) next = i
+        })
+        if (next >= 0 && next !== activeIndex.current) {
+          activeIndex.current = next
+          setActive(next)
+          centre(next)
+        }
+      }
+      ScrollTrigger.create({ start: 0, end: 'max', onUpdate: sync, onRefresh: sync })
+      sync()
+    }, nav)
+
+    return () => {
+      tweens.forEach((t) => t.kill())
+      ctx.revert()
+    }
+  }, [centre])
+
+  const jump = (i: number) => {
+    const el = document.getElementById(navSections[i].id)
+    if (el) scrollToTarget(el)
+  }
+
+  return (
+    <nav className="pd-nav" ref={navRef} aria-label="Trip sections" inert={!shown}>
+      <div className="pd-nav__pill" ref={pillRef}>
+        <div className="pd-nav__items" ref={itemsRef}>
+          <ul className="pd-nav__list" ref={listRef}>
+            {navSections.map((s, i) => (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  className={`pd-nav__link${i === active ? ' is-active' : ''}`}
+                  aria-current={i === active ? 'true' : undefined}
+                  onClick={() => jump(i)}
+                >
+                  {s.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  )
+}
+
 export default function PackageDetails() {
   const rootRef = useRef<HTMLDivElement>(null)
   useSquircles(rootRef)
@@ -670,7 +821,10 @@ export default function PackageDetails() {
     <BookingProvider>
     <div className="pd" ref={rootRef} data-bg-root>
       <SiteNav tone="dark" />
+      <SectionNav />
 
+      {/* Everything above the trip copy: the nav reveals itself once this block has scrolled past. */}
+      <div className="pd__hero">
       <header className="pd__head">
         <h1>Cambodia Discovery<br />Temples to Rainforests</h1>
         <dl className="pd__facts">
@@ -691,14 +845,17 @@ export default function PackageDetails() {
       </header>
 
       <Gallery />
+      </div>
 
       <div className="pd__body">
         <div className="pd__main">
-          <p className="pd__label">Journey Overview</p>
-          <p className="pd__lead">This itinerary brings together Cambodia's ancient heritage, welcoming communities and remarkable natural landscapes. Travel from Siem Reap to Battambang, continue through the Cardamom Mountains and Tatai River, and finish in Kampot with onward connections to Vietnam.</p>
+          <div id="pd-overview">
+            <p className="pd__label">Journey Overview</p>
+            <p className="pd__lead">This itinerary brings together Cambodia's ancient heritage, welcoming communities and remarkable natural landscapes. Travel from Siem Reap to Battambang, continue through the Cardamom Mountains and Tatai River, and finish in Kampot with onward connections to Vietnam.</p>
+          </div>
 
           <hr />
-          <div className="pd__incl">
+          <div className="pd__incl" id="pd-included">
             {inclusions.map(({ title, items, no }) => (
               <div key={title}>
                 <h2 className="pd__h3">{title}</h2>
@@ -721,7 +878,7 @@ export default function PackageDetails() {
           </div>
           <hr />
 
-          <section className="pd-stays" aria-labelledby="pd-stays-title">
+          <section className="pd-stays" id="pd-stays" aria-labelledby="pd-stays-title">
             <h2 className="pd__h3" id="pd-stays-title">Where you’ll stay</h2>
             <Reveal>
               <ul className="pd-stays__list">
@@ -743,7 +900,7 @@ export default function PackageDetails() {
           </section>
           <hr />
 
-          <section className="pd-know" aria-labelledby="pd-know-title">
+          <section className="pd-know" id="pd-know" aria-labelledby="pd-know-title">
             <h2 className="pd__h3" id="pd-know-title">Good to know</h2>
             <Reveal>
               <ul className="pd-know__grid">
@@ -761,17 +918,19 @@ export default function PackageDetails() {
           </section>
           <hr />
 
-          <h2 className="pd__h3 pd__guide-title">Meet your guide</h2>
-          <div className="pd__guide">
-            <div className="pd__guide-card">
-              <div className="pd__avatar"><img src={images.guidePhoto} alt="Taimi" /></div>
-              <h3>Taimi</h3>
-              <p>Expert</p>
+          <section id="pd-guide" aria-labelledby="pd-guide-title">
+            <h2 className="pd__h3 pd__guide-title" id="pd-guide-title">Meet your guide</h2>
+            <div className="pd__guide">
+              <div className="pd__guide-card">
+                <div className="pd__avatar"><img src={images.guidePhoto} alt="Taimi" /></div>
+                <h3>Taimi</h3>
+                <p>Expert</p>
+              </div>
+              <div className="pd__guide-bio">
+                <p>Hi! My name is Taimi and I love all things travel. I have hosted many group trips over the years and am most known for my masterfully curated journeys through the temples of Angkor. Join me on my next adventure!</p>
+              </div>
             </div>
-            <div className="pd__guide-bio">
-              <p>Hi! My name is Taimi and I love all things travel. I have hosted many group trips over the years and am most known for my masterfully curated journeys through the temples of Angkor. Join me on my next adventure!</p>
-            </div>
-          </div>
+          </section>
         </div>
 
         <aside className="pd__book">
@@ -794,15 +953,15 @@ export default function PackageDetails() {
         </aside>
       </div>
 
-      <RouteMap />
+      <div id="pd-route"><RouteMap /></div>
 
-      <StickyFeatures features={highlights} />
+      <div id="pd-highlights"><StickyFeatures features={highlights} /></div>
 
-      <Itinerary />
+      <div id="pd-itinerary"><Itinerary /></div>
 
-      <Reviews />
+      <div id="pd-reviews"><Reviews /></div>
 
-      <Faq />
+      <div id="pd-faq"><Faq /></div>
 
       <Footer />
 

@@ -564,6 +564,31 @@ html.lenis { scroll-behavior: auto; }
 .pd__do-fixed { position: fixed; z-index: 20; left: 50%; bottom: 32px; transform: translateX(-50%); visibility: hidden; opacity: 0; }
 .pd__do-fixed .btn-split > span { box-shadow: 0 16px 40px rgb(0 0 0 / .22); }
 
+/* Floating section nav (Red Dot pageNavCarousel): frosted pill pinned to the bottom of the screen.
+   Hidden over the trip header, unveiled once the photos pass, follows the section crossing the lower
+   part of the screen, and slides away over the footer. Show/hide timings live in PackageDetails.tsx. */
+.pd-nav { position: fixed; z-index: 36; left: 0; right: 0; bottom: 32px; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+.pd-nav__pill { max-width: 100%; padding: 7px; border-radius: 100px; background: rgb(70 84 80 / .92); -webkit-backdrop-filter: blur(30px) saturate(160%); backdrop-filter: blur(30px) saturate(160%); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .14), 0 10px 30px rgb(9 32 26 / .16); pointer-events: auto; clip-path: inset(0px 100% 0% 0px round 100px); }
+.pd-nav__items { max-width: 100%; overflow: hidden; border-radius: 100px; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); }
+.pd-nav__list { position: relative; display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -ms-overflow-style: none; }
+.pd-nav__list::-webkit-scrollbar { display: none; }
+.pd-nav__link { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border: 0; border-radius: 100px; background: transparent; color: color-mix(in srgb, var(--color-background-alt) 88%, transparent); font: var(--fs-subtext)/1 var(--font-medium); white-space: nowrap; transition: color .3s cubic-bezier(.4, 0, .2, 1), background-color .3s cubic-bezier(.4, 0, .2, 1); }
+.pd-nav__link:hover { color: var(--color-background-alt); background: rgb(255 255 255 / .12); }
+.pd-nav__link.is-active { color: var(--color-primary); background: var(--color-background-alt); }
+.pd-nav__link:focus-visible { outline: 2px solid var(--color-background-alt); outline-offset: 2px; }
+/* Keep clear of the boxed "See full details" button (desktop) and the booking bar (tablets). */
+@media (min-width: 1024px) { .pd__do-fixed { bottom: 104px; } }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .pd-nav { bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .pd__do-fixed { bottom: calc(166px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 767px) {
+  .pd-nav { bottom: calc(100px + env(safe-area-inset-bottom)); padding: 0 12px; }
+  .pd-nav__pill { padding: 5px; }
+  .pd-nav__link { height: 40px; padding: 0 15px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { .pd-nav__link { transition: none; } }
+
 /* "What you'll do" details dialog — Apple-style: frosted, blurred backdrop and a clean sheet that springs in. */
 .pd-dlg { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; background: color-mix(in srgb, var(--color-primary) 22%, transparent); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s linear .35s; }
 .pd-dlg.is-open { opacity: 1; visibility: visible; transition: opacity .35s ease; }
