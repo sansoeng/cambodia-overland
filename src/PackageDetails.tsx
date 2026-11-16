@@ -659,13 +659,10 @@ const goodToKnow = [
   { title: 'Accessibility', text: 'Some days include boats and uneven trails. Message us for details.', icon: 'M12 3.5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5ZM5 9l7 1 7-1M12 10v4.5M12 14.5l-3 6M12 14.5l3 6' },
 ]
 
-/* Sections the floating nav can jump to, in page order. Each id lives on a wrapper in the page below. */
+/* Sections the floating nav can jump to, in page order. Each id lives on a wrapper in the page below.
+   The trip copy (overview, inclusions, stays, good to know, guide) is one tab: Overview. */
 const navSections = [
   { id: 'pd-overview', label: 'Overview' },
-  { id: 'pd-included', label: 'What’s included' },
-  { id: 'pd-stays', label: 'Stays' },
-  { id: 'pd-know', label: 'Good to know' },
-  { id: 'pd-guide', label: 'Guide' },
   { id: 'pd-route', label: 'Route' },
   { id: 'pd-highlights', label: 'Highlights' },
   { id: 'pd-itinerary', label: 'Itinerary' },
@@ -848,14 +845,12 @@ export default function PackageDetails() {
       </div>
 
       <div className="pd__body">
-        <div className="pd__main">
-          <div id="pd-overview">
-            <p className="pd__label">Journey Overview</p>
-            <p className="pd__lead">This itinerary brings together Cambodia's ancient heritage, welcoming communities and remarkable natural landscapes. Travel from Siem Reap to Battambang, continue through the Cardamom Mountains and Tatai River, and finish in Kampot with onward connections to Vietnam.</p>
-          </div>
+        <div className="pd__main" id="pd-overview">
+          <p className="pd__label">Journey Overview</p>
+          <p className="pd__lead">This itinerary brings together Cambodia's ancient heritage, welcoming communities and remarkable natural landscapes. Travel from Siem Reap to Battambang, continue through the Cardamom Mountains and Tatai River, and finish in Kampot with onward connections to Vietnam.</p>
 
           <hr />
-          <div className="pd__incl" id="pd-included">
+          <div className="pd__incl">
             {inclusions.map(({ title, items, no }) => (
               <div key={title}>
                 <h2 className="pd__h3">{title}</h2>
@@ -878,7 +873,7 @@ export default function PackageDetails() {
           </div>
           <hr />
 
-          <section className="pd-stays" id="pd-stays" aria-labelledby="pd-stays-title">
+          <section className="pd-stays" aria-labelledby="pd-stays-title">
             <h2 className="pd__h3" id="pd-stays-title">Where you’ll stay</h2>
             <Reveal>
               <ul className="pd-stays__list">
@@ -900,7 +895,7 @@ export default function PackageDetails() {
           </section>
           <hr />
 
-          <section className="pd-know" id="pd-know" aria-labelledby="pd-know-title">
+          <section className="pd-know" aria-labelledby="pd-know-title">
             <h2 className="pd__h3" id="pd-know-title">Good to know</h2>
             <Reveal>
               <ul className="pd-know__grid">
@@ -918,7 +913,7 @@ export default function PackageDetails() {
           </section>
           <hr />
 
-          <section id="pd-guide" aria-labelledby="pd-guide-title">
+          <section aria-labelledby="pd-guide-title">
             <h2 className="pd__h3 pd__guide-title" id="pd-guide-title">Meet your guide</h2>
             <div className="pd__guide">
               <div className="pd__guide-card">
