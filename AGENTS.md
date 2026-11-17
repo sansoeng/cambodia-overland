@@ -51,7 +51,7 @@ expected verification.
 - Check first: `lsof -nP -iTCP:8443 -sTCP:LISTEN`. If it belongs to BCE
   (`ps -o command= -p <pid>`), run this project with `PORT=8444 pnpm dev`.
 - Never assume a server on 8443 is this app. Verify the page title is
-  **"Cambodia Overland — Expeditions & Adventure Tours"**.
+  **"Expeditions & Adventure Tours in Cambodia"**.
 
 ---
 

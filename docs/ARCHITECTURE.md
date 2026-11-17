@@ -105,7 +105,7 @@ ps -o command= -p <pid>     # expect .../BCE/node_modules/.bin/vite for the othe
 ```
 
 A 200 response is not proof of identity — verify the page title is
-`Cambodia Overland — Expeditions & Adventure Tours`.
+`Expeditions & Adventure Tours in Cambodia`.
 
 ---
 
